@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Portal Analista de OTAs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: Notion-style workspace — fixed left sidebar (pages), single reading column, cards only where a block is an object you act on. Brand: manual Loggro Alojamientos. */
+:root{
+  --bg:#FFFFFF; --side:#F6F5F1; --surface:#FBFBF9; --line:#E7E6E0; --ink:#2F2F2F; --muted:#6E6D68; --soft:#9A9993;
+  --green:#149E71; --green-bg:#E7F5EF; --teal:#1F8297; --teal-bg:#E6F2F5; --deep:#003940; --deep-bg:#E3ECED;
+  --aqua:#49D3CC; --orange:#E55E1E; --orange-bg:#FCEEE6; --gray-bg:#EFEEEA; --hl:#FFF5CC;
+  --btn-ink:#FFFFFF;
+  --font:"Montserrat",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r:8px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#191919; --side:#202020; --surface:#222322; --line:#333432; --ink:#ECECEA; --muted:#A3A29C; --soft:#7C7B76;
+  --green:#2FBF8C; --green-bg:#173329; --teal:#4FB3C9; --teal-bg:#16292E; --deep:#7FC3C9; --deep-bg:#1A2C2E;
+  --aqua:#49D3CC; --orange:#F07A43; --orange-bg:#35221A; --gray-bg:#2A2A29; --hl:#4A4020; --btn-ink:#0E1A16; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#191919; --side:#202020; --surface:#222322; --line:#333432; --ink:#ECECEA; --muted:#A3A29C; --soft:#7C7B76;
+  --green:#2FBF8C; --green-bg:#173329; --teal:#4FB3C9; --teal-bg:#16292E; --deep:#7FC3C9; --deep-bg:#1A2C2E;
+  --aqua:#49D3CC; --orange:#F07A43; --orange-bg:#35221A; --gray-bg:#2A2A29; --hl:#4A4020; --btn-ink:#0E1A16; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.6;}
+a{color:var(--teal)}
+h1,h2,h3,h4{text-wrap:balance;line-height:1.25;margin:0}
+p{margin:0}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:4px}
+
+.app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
+/* Sidebar */
+.side{background:var(--side);border-right:1px solid var(--line);position:sticky;top:0;height:100vh;overflow-y:auto;padding:18px 12px;display:flex;flex-direction:column;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px}
+.brand-mark{width:28px;height:28px;border-radius:7px;background:var(--green);display:grid;place-items:center;color:#fff;font-weight:700;font-size:13px}
+.brand b{display:block;font-size:13px;font-weight:600}
+.brand span{display:block;font-size:11px;color:var(--muted)}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);padding:0 10px 4px}
+.nav a{display:flex;gap:10px;align-items:center;padding:6px 10px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:14px;font-weight:500}
+.nav a:hover{background:var(--gray-bg)}
+.nav a[aria-current="page"]{background:var(--gray-bg);font-weight:600}
+.nav .ico{width:20px;text-align:center;font-size:14px}
+.side-foot{margin-top:auto;font-size:11.5px;color:var(--muted);padding:0 10px;line-height:1.5}
+
+/* Main */
+.main{min-width:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 80px}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;align-items:center;gap:12px;padding-block:12px;border-bottom:1px solid var(--line);max-width:920px;margin:0 auto}
+.crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.search{position:relative;width:min(320px,100%)}
+.search input{width:100%;font:inherit;font-size:13.5px;padding:7px 10px 7px 32px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--soft)}
+.results{position:absolute;right:0;top:calc(100% + 6px);width:min(420px,calc(100vw - 32px));background:var(--bg);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 10px 30px rgba(0,0,0,.12);max-height:60vh;overflow:auto;padding:6px}
+.results button{display:block;width:100%;text-align:left;font:inherit;background:none;border:0;padding:8px 10px;border-radius:6px;color:var(--ink);cursor:pointer}
+.results button:hover,.results button:focus{background:var(--gray-bg)}
+.results small{display:block;color:var(--muted);font-size:12px}
+.results .none{padding:10px;color:var(--muted);font-size:13px}
+
+.page{max-width:920px;margin:0 auto;padding-top:36px;display:flex;flex-direction:column;gap:36px}
+.page-head{display:flex;flex-direction:column;gap:10px}
+.page-ico{font-size:40px;line-height:1}
+.page-head h1{font-size:34px;font-weight:700;letter-spacing:-.01em}
+.lead{font-size:16px;color:var(--muted);max-width:66ch}
+section.block{display:flex;flex-direction:column;gap:14px}
+section.block > h2{font-size:20px;font-weight:600;padding-bottom:6px;border-bottom:1px solid var(--line)}
+h3{font-size:16px;font-weight:600}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.prose{max-width:68ch;display:flex;flex-direction:column;gap:8px}
+ul.list{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+
+/* Callouts */
+.callout{display:flex;gap:12px;padding:14px 16px;border-radius:var(--r);background:var(--gray-bg);font-size:14px}
+.callout .ci{font-size:18px;line-height:1.3}
+.callout.warn{background:var(--orange-bg)}
+.callout.info{background:var(--teal-bg)}
+.callout.ok{background:var(--green-bg)}
+.callout > div{min-width:0;display:flex;flex-direction:column;gap:4px}
+
+/* Tags */
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:4px;white-space:nowrap;letter-spacing:.01em}
+.t-agendar{background:var(--teal-bg);color:var(--teal)}
+.t-ticket{background:var(--green-bg);color:var(--green)}
+.t-ambos{background:var(--deep-bg);color:var(--deep)}
+.t-redir{background:var(--orange-bg);color:var(--orange)}
+.t-pend{background:var(--gray-bg);color:var(--muted)}
+.t-doc{background:var(--gray-bg);color:var(--muted);font-weight:500}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:14px;font-weight:600;padding:10px 16px;border-radius:7px;border:1px solid transparent;text-decoration:none;cursor:pointer;line-height:1.2}
+.btn-primary{background:var(--green);color:var(--btn-ink)}
+.btn-primary:hover{filter:brightness(1.07)}
+.btn-teal{background:var(--teal);color:var(--btn-ink)}
+.btn-ghost{background:var(--bg);color:var(--ink);border-color:var(--line)}
+.btn-ghost:hover{background:var(--gray-bg)}
+.btn[aria-disabled="true"]{background:var(--gray-bg);color:var(--soft);border:1px dashed var(--line);cursor:not-allowed}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px}
+
+/* Link cards */
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.lcard{border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
+.lcard.hero{border-color:var(--green);box-shadow:0 0 0 3px var(--green-bg)}
+.lcard h3{font-size:15px}
+.lcard .meta{font-size:12.5px;color:var(--muted)}
+.lcard .btn{align-self:flex-start;margin-top:auto}
+
+/* Quick access tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.tile{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:var(--r);border:1px solid var(--line);text-decoration:none;color:var(--ink);background:var(--bg)}
+.tile:hover{background:var(--surface);border-color:var(--soft)}
+.tile b{font-size:14px;font-weight:600}
+.tile span{font-size:12.5px;color:var(--muted)}
+
+/* Router */
+.router{border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:18px;background:var(--surface)}
+.router h2{font-size:18px;font-weight:600}
+.q{display:flex;flex-direction:column;gap:8px}
+.q-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:14px;font-weight:500;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.chip:hover{border-color:var(--soft)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.result{border-top:1px solid var(--line);padding-top:18px;display:flex;flex-direction:column;gap:14px}
+.result-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.result-head h3{font-size:17px}
+ol.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:s}
+ol.steps li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;counter-increment:s}
+ol.steps li::before{content:counter(s);width:26px;height:26px;border-radius:50%;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;font-size:12.5px;font-weight:600}
+ol.steps li > div{display:flex;flex-direction:column;gap:8px;min-width:0}
+.prep{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;font-size:13.5px}
+.prep b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px}
+
+/* Table */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:13.5px}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{font-size:12px;font-weight:600;color:var(--muted);background:var(--surface);text-transform:uppercase;letter-spacing:.04em}
+tr:last-child td{border-bottom:0}
+td .tag{margin-bottom:4px}
+
+/* Accordion */
+details.acc{border:1px solid var(--line);border-radius:var(--r);background:var(--bg)}
+details.acc + details.acc{margin-top:-6px}
+details.acc summary{cursor:pointer;list-style:none;padding:12px 14px;font-weight:600;font-size:14.5px;display:flex;gap:10px;align-items:center}
+details.acc summary::-webkit-details-marker{display:none}
+details.acc summary::before{content:"";width:0;height:0;border-left:6px solid var(--muted);border-top:4.5px solid transparent;border-bottom:4.5px solid transparent;transition:transform .15s}
+details.acc[open] summary::before{transform:rotate(90deg)}
+details.acc .acc-body{padding:0 14px 14px 30px;display:flex;flex-direction:column;gap:10px;font-size:14px}
+
+/* Columns */
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.col{border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px}
+.col h3{display:flex;align-items:center;gap:8px;font-size:15px}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+.col ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+.src{font-size:11px;color:var(--soft);font-weight:500;margin-left:4px;white-space:nowrap}
+
+/* Checklist */
+.check{border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.check-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.progress{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{width:140px;height:6px;border-radius:3px;background:var(--gray-bg);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--green);width:0;transition:width .2s}
+.items{display:flex;flex-direction:column;gap:2px}
+.item{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;padding:8px 6px;border-radius:6px;cursor:pointer;font-size:14px}
+.item:hover{background:var(--surface)}
+.item input{width:17px;height:17px;margin:2px 0 0;accent-color:var(--green)}
+.item small{display:block;color:var(--muted);font-size:12.5px}
+.item.done span > b{text-decoration:line-through;color:var(--muted)}
+.check-msg{font-size:13.5px;padding:10px 12px;border-radius:6px}
+
+/* Template box */
+.tpl{border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.tpl-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--line);font-size:13px;font-weight:600}
+.tpl pre{margin:0;padding:14px;font-family:var(--font);font-size:13.5px;white-space:pre-wrap;line-height:1.7;user-select:all}
+.copy{font:inherit;font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:5px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+
+.flash{animation:flash 1.6s ease}
+@keyframes flash{0%,40%{background:var(--hl)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Mobile */
+.menu-btn{display:none;font:inherit;background:none;border:1px solid var(--line);border-radius:6px;padding:6px 9px;color:var(--ink);cursor:pointer}
+@media (max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:fixed;inset:0 auto 0 0;width:min(280px,85vw);z-index:20;transform:translateX(-100%);transition:transform .2s;padding-top:calc(18px + env(safe-area-inset-top,0px));padding-left:calc(12px + env(safe-area-inset-left,0px));box-shadow:0 0 40px rgba(0,0,0,.2)}
+  .side.open{transform:none}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:15}
+  .menu-btn{display:block}
+  .page-head h1{font-size:27px}
+  .search{width:auto;flex:1}
+  .crumb{display:none}
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+</style>
+
+<style>
+.area-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.area-card{display:flex;flex-direction:column;gap:8px;padding:18px;border-radius:12px;border:1px solid var(--line);text-decoration:none;color:var(--ink);background:var(--bg)}
+.area-card:hover{border-color:var(--soft);background:var(--surface)}
+.area-card .a-ico{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;font-weight:700;font-size:12px;color:#fff}
+.area-card b{font-size:16px}
+.area-card span{font-size:13px;color:var(--muted)}
+.area-card .go{margin-top:auto;font-size:13px;font-weight:600;color:var(--teal)}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.dest{border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--line)}
+.dest.mtto{background:var(--orange-bg);border-color:transparent}
+.dest.ota{background:var(--teal-bg);border-color:transparent}
+.dest h3{font-size:16px;display:flex;gap:8px;align-items:center}
+.dest ul{margin:0;padding-left:18px;font-size:13.5px;display:flex;flex-direction:column;gap:4px}
+.dest .how{font-size:13px;border-top:1px solid var(--line);padding-top:10px}
+.area-badge{align-self:flex-start}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side" aria-label="Navegación">
+    <div class="brand"><div class="brand-mark" aria-hidden="true">OTA</div><div><b>Analista de OTAs</b><span>Loggro Alojamientos</span></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">Fuente: documento “Agendamiento de sesiones – Análisis de OTAs”. Los links se editan en el bloque <code>CONFIG</code> del código.</div>
+  </aside>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <main class="main">
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Abrir menú">☰</button>
+      <div class="crumb" id="crumb">Analista de OTAs</div>
+      <div class="search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Buscar: Partner Card, plan Plus, Teams…" autocomplete="off" aria-label="Buscar en el portal">
+        <div class="results" id="results" hidden></div>
+      </div>
+    </div>
+
+    <!-- ============ INICIO ============ -->
+    <div class="page" data-page="inicio">
+      <header class="page-head">
+        <div class="page-ico" aria-hidden="true">🏠</div>
+        <h1>Centro de ayuda del Analista de OTAs</h1>
+        <p class="lead">Cada área tiene su propia pestaña con sus rutas, links y checklist. Entra a la tuya: ahí está solo lo que te aplica.</p>
+      </header>
+
+      <section class="block" data-idx="elige tu área AM implementación SAC">
+        <h2>Elige tu área</h2>
+        <div class="area-cards">
+          <a class="area-card" href="#am"><div class="a-ico" style="background:var(--teal)">AM</div><b>Account Manager</b><span>Creación de OTAs e inconsistencias, con o sin Partner Card.</span><span class="go">Ir a AM →</span></a>
+          <a class="area-card" href="#implementacion"><div class="a-ico" style="background:var(--deep)">IMP</div><b>Implementación</b><span>Creación de OTAs, inconsistencias de OTAs y qué va a Mantenimiento.</span><span class="go">Ir a Implementación →</span></a>
+          <a class="area-card" href="#sac"><div class="a-ico" style="background:var(--green)">SAC</div><b>Servicio al Cliente</b><span>Inconsistencias según el plan del hotel.</span><span class="go">Ir a SAC →</span></a>
+        </div>
+      </section>
+
+      <section class="block" data-idx="agendar escalar diferencia ticket sesión">
+        <h2>Agendar no es lo mismo que escalar</h2>
+        <div class="cols">
+          <div class="col"><h3><span class="tag t-agendar">Agendar</span></h3><p class="small">Reservar una sesión <b>con el hotel</b> en el calendario “Reunirse con Analista OTAs”.</p></div>
+          <div class="col"><h3><span class="tag t-ticket">Escalar</span></h3><p class="small">Crear un <b>ticket en HubSpot</b> con el formulario de tu área. Cada formulario detalla los campos que debe llevar.</p></div>
+          <div class="col"><h3><span class="tag t-ambos">Agendar + ticket</span></h3><p class="small">La ruta más común: primero agendas y luego creas el ticket con la información de la sesión.</p></div>
+        </div>
+        <div class="callout ok"><div class="ci" aria-hidden="true">✅</div><div><b>Todo lo que se envía al Analista de OTAs lleva ticket.</b><span>Agendar una sesión nunca reemplaza el ticket. Sin ticket, la solicitud no queda registrada.</span></div></div>
+      </section>
+
+      <section class="block" data-idx="qué hace el analista de OTAs rol">
+        <h2>Qué hace el Analista de OTAs</h2>
+        <div class="prose"><p>Es un rol especializado en conexiones e integraciones con agencias de viaje en línea (OTAs). Acompaña la <b>creación de OTAs</b> del hotel en sesión y revisa <b>inconsistencias de OTAs</b> que reportan AM, Implementación y SAC. No es un asesor de SAC ni atiende las conversaciones habituales de los hoteles. <a href="#alcance">Ver alcance completo</a>.</p></div>
+      </section>
+
+      <section class="block" data-idx="matriz resumen rutas por área">
+        <h2>Resumen de rutas</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Área</th><th>Creación de OTAs</th><th>Inconsistencias</th></tr></thead>
+          <tbody>
+            <tr><td><b>AM</b></td><td><span class="tag t-ambos">Agendar + ticket</span></td><td><span class="tag t-ticket">Ticket</span> con Partner Card<br><span class="tag t-ambos">Agendar + ticket</span> sin Partner Card</td></tr>
+            <tr><td><b>Implementación</b></td><td><span class="tag t-ambos">Agendar + ticket</span></td><td><span class="tag t-ambos">Agendar + ticket</span> si es de OTAs<br><span class="tag t-redir">Mantenimiento</span> si es del PMS</td></tr>
+            <tr><td><b>SAC</b></td><td><span class="tag t-pend">No definido</span></td><td><span class="tag t-redir">Plus/Premium → AM</span><br><span class="tag t-ambos">Agendar + ticket</span> Estándar/Básico</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+    </div>
+
+    <!-- ============ AM ============ -->
+    <div class="page" data-page="am" hidden>
+      <header class="page-head">
+        <span class="tag t-agendar area-badge">Pestaña de AM</span>
+        <h1>AM – Account Manager</h1>
+        <p class="lead">Lo que necesitas para solicitar creación de OTAs o reportar inconsistencias al Analista de OTAs.</p>
+      </header>
+      <section class="router" data-idx="ruta AM creación inconsistencia Partner Card">
+        <h2>¿Qué necesitas?</h2>
+        <div data-router="AM"></div>
+      </section>
+      <section class="block" data-idx="links AM calendario formulario">
+        <h2>Tus links</h2>
+        <div class="links" data-cards="calendario,formAM"></div>
+      </section>
+      <section class="block">
+        <h2>Reglas de AM</h2>
+        <details class="acc" open data-idx="creación de OTAs AM">
+          <summary>Creación de OTAs (todas)</summary>
+          <div class="acc-body"><p>1. Agenda la sesión con el hotel. 2. Crea el ticket de creación indicando las OTAs requeridas y los detalles de la solicitud.</p></div>
+        </details>
+        <details class="acc" open data-idx="inconsistencias AM con Partner Card sin Partner Card">
+          <summary>Inconsistencias</summary>
+          <div class="acc-body">
+            <p><b>Con Partner Card:</b> solo ticket en HubSpot. No se necesita reunión.</p>
+            <p><b>Sin Partner Card:</b> agenda sesión con el hotel y crea el ticket en HubSpot.</p>
+          </div>
+        </details>
+      </section>
+      <section class="block" data-idx="checklist AM">
+        <h2>Checklist antes de enviar</h2>
+        <div data-check="AM"></div>
+      </section>
+      <section class="block" data-idx="cierre pipeline Alojamientos Acompañamiento AM">
+        <h2>Cuando se cierra tu ticket</h2>
+        <div class="callout ok"><div class="ci" aria-hidden="true">📥</div><div><span>Llega como <b>Nuevo</b> al pipeline de HubSpot <b>Alojamientos | Acompañamiento AM</b>. Desde ahí tienes visibilidad del cierre e informas al hotel la solución.</span></div></div>
+      </section>
+    </div>
+
+    <!-- ============ IMPLEMENTACIÓN ============ -->
+    <div class="page" data-page="implementacion" hidden>
+      <header class="page-head">
+        <span class="tag t-ambos area-badge">Pestaña de Implementación</span>
+        <h1>Implementación</h1>
+        <p class="lead">Antes de escalar, define a quién le corresponde: los temas del PMS van a Mantenimiento y los temas de OTAs van al Analista de OTAs. Son rutas distintas.</p>
+      </header>
+
+      <section class="block" data-idx="mantenimiento o analista de OTAs PMS OTAs a quién escalar">
+        <h2>¿Mantenimiento o Analista de OTAs?</h2>
+        <div class="split">
+          <div class="dest mtto">
+            <h3>🛠️ Mantenimiento (Producto)</h3>
+            <ul><li>Novedades o bloqueantes del <b>PMS</b> que impiden continuar la implementación.</li></ul>
+            <div class="how"><b>Cómo:</b> canal de Teams <b>Validacion Mtto alojamientos</b>, con la plantilla de abajo.</div>
+          </div>
+          <div class="dest ota">
+            <h3>🔗 Analista de OTAs</h3>
+            <ul><li><b>Creación de OTAs</b> del hotel.</li><li><b>Inconsistencias</b> en conexiones, canales o integraciones con OTAs.</li></ul>
+            <div class="how"><b>Cómo:</b> agendar sesión con el hotel + formulario de Implementación.</div>
+          </div>
+        </div>
+        <div class="callout info"><div class="ci" aria-hidden="true">🎓</div><div><b>Capacitación de OTAs en curso.</b><span>Mientras no finalice, Implementación sí puede agendar sesiones por inconsistencias de OTAs. Cuando termine, el equipo de Implementación asumirá estas inconsistencias y dejará de escalarlas al analista.</span></div></div>
+      </section>
+
+      <section class="router" data-idx="ruta implementación creación inconsistencia PMS">
+        <h2>¿Qué necesitas?</h2>
+        <div data-router="Implementacion"></div>
+      </section>
+
+      <section class="block" data-idx="links implementación calendario formulario">
+        <h2>Tus links</h2>
+        <div class="links" data-cards="calendario,formImpl"></div>
+      </section>
+
+      <section class="block" data-idx="plantilla reporte mantenimiento producto teams">
+        <h2>Plantilla de reporte a Mantenimiento</h2>
+        <p class="small muted">Úsala en el canal Validacion Mtto alojamientos. Cada dos semanas Producto informa en el canal quién atiende las novedades; etiqueta a esa persona.</p>
+        <div class="tpl">
+          <div class="tpl-head"><span>Copiar y completar</span><button class="copy" id="copyTpl" type="button">Copiar</button></div>
+<pre id="tplText">Nombre del hotel:
+ID del hotel:
+Descripción detallada de la novedad o solicitud:
+(Sé explícito y claro, explicando la solicitud)
+Adjuntos: imágenes o videos de soporte, si aplica
+@[persona de Producto encargada esta quincena]</pre>
+        </div>
+      </section>
+
+      <section class="block" data-idx="checklist implementación">
+        <h2>Checklist antes de enviar al Analista de OTAs</h2>
+        <div data-check="Implementacion"></div>
+      </section>
+
+      <section class="block" data-idx="seguimiento cierre implementación">
+        <h2>Después de escalar</h2>
+        <div class="callout ok"><div class="ci" aria-hidden="true">🔁</div><div><span>Ya sea a Mantenimiento o al Analista de OTAs, haz seguimiento al caso hasta su solución final o cierre.</span></div></div>
+      </section>
+    </div>
+
+    <!-- ============ SAC ============ -->
+    <div class="page" data-page="sac" hidden>
+      <header class="page-head">
+        <span class="tag t-ticket area-badge">Pestaña de SAC</span>
+        <h1>SAC – Servicio al Cliente</h1>
+        <p class="lead">SAC escala al Analista de OTAs solo inconsistencias, y solo de hoteles con plan Estándar o Básico.</p>
+      </header>
+      <section class="block" data-idx="plan del hotel Plus Premium Estándar Básico">
+        <h2>Primero revisa el plan del hotel</h2>
+        <div class="split">
+          <div class="dest mtto"><h3>Plus / Premium</h3><ul><li>Direcciona el caso al <b>Account Manager</b> correspondiente.</li><li>No agendes con el analista.</li></ul></div>
+          <div class="dest ota"><h3>Estándar / Básico</h3><ul><li>Agenda la sesión con el hotel.</li><li>Crea el ticket con el motivo, la fecha y la hora programadas.</li></ul></div>
+        </div>
+      </section>
+      <section class="router" data-idx="ruta SAC inconsistencia plan">
+        <h2>¿Qué plan tiene el hotel?</h2>
+        <div data-router="SAC"></div>
+      </section>
+      <section class="block" data-idx="links SAC calendario formulario">
+        <h2>Tus links</h2>
+        <div class="links" data-cards="calendario,formSAC"></div>
+      </section>
+      <section class="block" data-idx="checklist SAC">
+        <h2>Checklist antes de enviar</h2>
+        <div data-check="SAC"></div>
+      </section>
+      <section class="block" data-idx="creación OTAs SAC no definido">
+        <h2>Fuera de esta ruta</h2>
+        <div class="callout"><div class="ci" aria-hidden="true">📝</div><div><span>El documento no contempla solicitudes de creación de OTAs desde SAC, ni cómo se notifica a SAC el cierre del ticket.</span></div></div>
+      </section>
+    </div>
+
+    <!-- ============ ALCANCE ============ -->
+    <div class="page" data-page="alcance" hidden>
+      <header class="page-head">
+        <div class="page-ico" aria-hidden="true">🧩</div>
+        <h1>Alcance y responsabilidades</h1>
+        <p class="lead">Qué resuelve el Analista de OTAs y qué no. Cada punto indica su fuente: el documento de agendamiento o la definición del rol en SAC Alojamientos.</p>
+      </header>
+      <section class="block" data-idx="alcance responsabilidades diagnostica resuelve escala producto no corresponde">
+        <div class="cols">
+          <div class="col"><h3><span class="dot" style="background:var(--green)"></span>Diagnostica y resuelve</h3>
+            <ul>
+              <li>Creación de OTAs del hotel en sesión <span class="src">Documento</span></li>
+              <li>Inconsistencias de OTAs reportadas por AM, Implementación y SAC <span class="src">Documento</span></li>
+              <li>Problemas de conexiones e integraciones <span class="src">Rol</span></li>
+              <li>Revisión de configuraciones de canales <span class="src">Rol</span></li>
+              <li>Validación de la solución y cierre del caso <span class="src">Rol</span></li>
+            </ul></div>
+          <div class="col"><h3><span class="dot" style="background:var(--teal)"></span>Coordina con otras áreas</h3>
+            <ul>
+              <li>AM: recibe el cierre del ticket en su pipeline e informa al hotel <span class="src">Documento</span></li>
+              <li>Hoteles Plus/Premium: llegan a través del AM, no de SAC <span class="src">Documento</span></li>
+            </ul></div>
+          <div class="col"><h3><span class="dot" style="background:var(--deep)"></span>Escala a Producto</h3>
+            <ul><li>Casos de OTAs que requieren intervención de desarrollo <span class="src">Rol</span></li></ul></div>
+          <div class="col"><h3><span class="dot" style="background:var(--orange)"></span>No le corresponde</h3>
+            <ul>
+              <li>Atender las conversaciones habituales de los hoteles: no es asesor de SAC <span class="src">Rol</span></li>
+              <li>Novedades o bloqueantes del PMS en implementación: van a Mantenimiento <span class="src">Definición SAC</span></li>
+              <li>Inconsistencias de Implementación una vez finalice la capacitación de OTAs (hoy en curso) <span class="src">Documento</span></li>
+            </ul></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ RECURSOS ============ -->
+    <div class="page" data-page="recursos" hidden>
+      <header class="page-head">
+        <div class="page-ico" aria-hidden="true">📚</div>
+        <h1>Recursos</h1>
+        <p class="lead">Herramientas que usan las áreas para coordinar con el Analista de OTAs y puntos que aún deben definirse.</p>
+      </header>
+      <section class="block" data-idx="herramientas HubSpot Teams Partner Card pipeline">
+        <h2>Herramientas</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Herramienta</th><th>Para qué se usa</th><th>Áreas</th></tr></thead>
+          <tbody>
+            <tr><td><b>HubSpot · Meetings</b></td><td>Calendario “Reunirse con Analista OTAs”.</td><td>AM, Implementación, SAC</td></tr>
+            <tr><td><b>HubSpot · Formularios</b></td><td>Tickets de creación e inconsistencias, uno por área.</td><td>AM, Implementación, SAC</td></tr>
+            <tr><td><b>HubSpot · Pipeline</b></td><td><i>Alojamientos | Acompañamiento AM</i>: recibe los tickets de AM cerrados por el analista.</td><td>AM</td></tr>
+            <tr><td><b>Teams · Validacion Mtto alojamientos</b></td><td>Reporte de novedades o bloqueantes del PMS a Mantenimiento (Producto).</td><td>Implementación</td></tr>
+            <tr><td><b>Partner Card</b></td><td>Acceso al perfil del hotel en la OTA. Con Partner Card, AM solo crea ticket; sin Partner Card, agenda sesión y crea ticket.</td><td>AM</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+      <section class="block" data-idx="observaciones pendientes por definir">
+        <h2>Pendientes</h2>
+        <details class="acc" open>
+          <summary>Por validar o definir</summary>
+          <div class="acc-body">
+            <ul class="list">
+              <li><b>Nombre de formulario.</b> En el documento aparece “Iconsistencias” en el formulario de Implementación; verifica el nombre real en HubSpot.</li>
+              <li>Ruta de creación de OTAs desde SAC, si existe.</li>
+              <li>Cómo se notifica el cierre del ticket a SAC e Implementación.</li>
+              <li>Criterios para escalar a Producto y evidencias obligatorias.</li>
+            </ul>
+          </div>
+        </details>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIG — edita aquí links y textos. url:null muestra "Link pendiente".
+   ===================================================================== */
+const CONFIG = {
+  links: {
+    calendario: { name:"Reunirse con Analista OTAs", url:"https://meetings.hubspot.com/nicolas-devia?uuid=7f328bb5-e168-42a0-81bf-fa7c7d79f76c", tool:"HubSpot Meetings", kind:"agendar",
+                  note:"Sesión con el hotel. Mismo calendario para AM, Implementación y SAC." },
+    formAM:     { name:"Creación/Inconsistencias OTAs AM", url:"https://share.hsforms.com/1JGSKGw1-TQeR3gZHSxECIwck0fn", tool:"Formulario HubSpot", kind:"ticket",
+                  note:"Creación de OTAs e inconsistencias, con o sin Partner Card." },
+    formImpl:   { name:"Creación/Inconsistencias OTAs Implementación", url:"https://share.hsforms.com/1zBq3xRIJRp2Qs_7qR8ACmQck0fn", tool:"Formulario HubSpot", kind:"ticket",
+                  note:"Creación de OTAs e inconsistencias de OTAs. Incluye fecha y hora de la sesión." },
+    formSAC:    { name:"Inconsistencias OTAs SAC", url:"https://share.hsforms.com/1BYB5nei2TjW-moQeI8lwOgck0fn", tool:"Formulario HubSpot", kind:"ticket",
+                  note:"Inconsistencias de hoteles Estándar/Básico. Incluye motivo, fecha y hora de la sesión." }
+  },
+  teamsChannel: "Validacion Mtto alojamientos"
+};
+
+const PAGES = [
+  {id:"inicio",         ico:"🏠", label:"Inicio", group:"General"},
+  {id:"am",             ico:"💼", label:"AM", group:"Áreas"},
+  {id:"implementacion", ico:"🚀", label:"Implementación", group:"Áreas"},
+  {id:"sac",            ico:"🎧", label:"SAC", group:"Áreas"},
+  {id:"alcance",        ico:"🧩", label:"Alcance y responsabilidades", group:"Referencia"},
+  {id:"recursos",       ico:"📚", label:"Recursos", group:"Referencia"}
+];
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function linkBtn(key, label, cls){
+  const l = CONFIG.links[key]; cls = cls || (l.kind==="agendar"?"btn-primary":"btn-teal");
+  if(!l.url) return `<span class="btn" aria-disabled="true">${esc(label||l.name)} · Link pendiente</span>`;
+  return `<a class="btn ${cls}" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(label||l.name)} ↗</a>`;
+}
+
+/* ---------- navegación ---------- */
+const nav=$("#nav"); let grp=null;
+PAGES.forEach(p=>{
+  if(p.group!==grp){ grp=p.group; const d=document.createElement("div"); d.className="nav-label"; d.style.marginTop=nav.children.length?"10px":"0"; d.textContent=grp; nav.appendChild(d); }
+  const a=document.createElement("a"); a.href="#"+p.id; a.dataset.id=p.id;
+  a.innerHTML=`<span class="ico" aria-hidden="true">${p.ico}</span>${esc(p.label)}`; nav.appendChild(a);
+});
+function show(id){
+  if(!PAGES.some(p=>p.id===id)) id="inicio";
+  document.querySelectorAll("[data-page]").forEach(el=>el.hidden=el.dataset.page!==id);
+  nav.querySelectorAll("a").forEach(a=>{ if(a.dataset.id===id) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+  $("#crumb").textContent="Analista de OTAs / "+PAGES.find(p=>p.id===id).label;
+  closeMenu();
+}
+function route(){ show((location.hash||"#inicio").slice(1)); window.scrollTo(0,0); }
+window.addEventListener("hashchange",route);
+const side=$("#side"), scrim=$("#scrim");
+function closeMenu(){ side.classList.remove("open"); scrim.hidden=true; }
+$("#menuBtn").addEventListener("click",()=>{ side.classList.add("open"); scrim.hidden=false; });
+scrim.addEventListener("click",closeMenu);
+
+/* ---------- tarjetas de links por área ---------- */
+document.querySelectorAll("[data-cards]").forEach(box=>{
+  box.innerHTML=box.dataset.cards.split(",").map(k=>{
+    const l=CONFIG.links[k], ag=l.kind==="agendar";
+    return `<div class="lcard${ag?" hero":""}">
+      <span class="tag ${ag?"t-agendar":"t-ticket"}" style="align-self:flex-start">${ag?"Agendar sesión":"Crear ticket"}</span>
+      <h3>${esc(l.name)}</h3><p class="meta">${esc(l.tool)} · ${esc(l.note)}</p>
+      ${linkBtn(k, ag?"Abrir calendario":"Abrir formulario")}</div>`;}).join("");
+});
+
+/* ---------- rutas por área ---------- */
+const TAGS={agendar:["t-agendar","Agendar sesión"],ticket:["t-ticket","Solo ticket"],ambos:["t-ambos","Agendar + ticket"],redir:["t-redir","Redirigir"],pend:["t-pend","No definido"]};
+const step=(t,x="")=>`<li><div><span>${t}</span>${x}</div></li>`;
+const row=k=>`<div class="btn-row">${linkBtn(k, CONFIG.links[k].kind==="agendar"?"Abrir calendario":null)}</div>`;
+
+const FLOWS = {
+  AM:{ label:"¿Qué necesitas?", opts:{
+    crear:{label:"Creación de OTAs", r:{type:"ambos",title:"Creación de OTAs",
+      steps:step("Agenda la sesión con el hotel.",row("calendario"))+step("Crea el ticket de creación indicando las OTAs requeridas y los detalles.",row("formAM")),
+      prep:["OTAs requeridas","Detalles de la solicitud","Campos que pide el formulario de HubSpot"],
+      after:"Al cerrarse, el ticket llega como Nuevo al pipeline Alojamientos | Acompañamiento AM."}},
+    incCon:{label:"Inconsistencia · con Partner Card", r:{type:"ticket",title:"Inconsistencia con Partner Card",
+      steps:step("Crea el ticket en HubSpot. No necesitas agendar.",row("formAM")),
+      prep:["Descripción de la inconsistencia","Campos que pide el formulario de HubSpot"],
+      after:"Al cerrarse, el ticket llega como Nuevo al pipeline Alojamientos | Acompañamiento AM."}},
+    incSin:{label:"Inconsistencia · sin Partner Card", r:{type:"ambos",title:"Inconsistencia sin Partner Card",
+      steps:step("Agenda la sesión con el hotel.",row("calendario"))+step("Crea el ticket en HubSpot con el detalle de la inconsistencia.",row("formAM")),
+      prep:["Descripción de la inconsistencia","Campos que pide el formulario de HubSpot"],
+      after:"Al cerrarse, el ticket llega como Nuevo al pipeline Alojamientos | Acompañamiento AM."}}
+  }},
+  Implementacion:{ label:"¿Qué necesitas?", opts:{
+    crear:{label:"Creación de OTAs", r:{type:"ambos",title:"Creación de OTAs → Analista de OTAs",
+      steps:step("Agenda la sesión con el hotel para crear el perfil en línea.",row("calendario"))+step("Diligencia el formulario con las OTAs requeridas, los detalles y la fecha y hora de la sesión.",row("formImpl")),
+      prep:["OTAs requeridas","Detalles de la solicitud","Fecha y hora de la sesión agendada"],
+      after:"Haz seguimiento al caso hasta su solución o cierre."}},
+    incOta:{label:"Inconsistencia de OTAs", r:{type:"ambos",title:"Inconsistencia de OTAs → Analista de OTAs",
+      steps:step("Agenda la sesión con el hotel.",row("calendario"))+step("Crea el ticket detallando la inconsistencia presentada.",row("formImpl")),
+      prep:["Detalle de la inconsistencia","Fecha y hora de la sesión agendada"],
+      after:"Ruta vigente mientras la capacitación de OTAs está en curso. Haz seguimiento hasta el cierre."}},
+    pms:{label:"Novedad o bloqueante del PMS", r:{type:"redir",title:"Novedad del PMS → Mantenimiento",
+      steps:step(`Publica la novedad en el canal de Teams <b>${esc(CONFIG.teamsChannel)}</b> con la plantilla y etiqueta a la persona de Producto de la quincena.`,`<div class="btn-row"><button class="btn btn-ghost" type="button" data-scroll="tplText">Ver plantilla ↓</button></div>`),
+      prep:["Nombre e ID del hotel","Descripción detallada","Imágenes o videos, si aplica"],
+      after:"Este caso no va al Analista de OTAs. Haz seguimiento en el canal hasta el cierre."}}
+  }},
+  SAC:{ label:"Plan del hotel", opts:{
+    plus:{label:"Plus o Premium", r:{type:"redir",title:"Hotel Plus/Premium → AM",
+      steps:step("Direcciona el caso al Account Manager (AM) correspondiente. No agendes con el analista."),
+      prep:["Identificación del hotel y su AM","Descripción de la inconsistencia"],after:""}},
+    std:{label:"Estándar o Básico", r:{type:"ambos",title:"Hotel Estándar/Básico → Analista de OTAs",
+      steps:step("Agenda la sesión con el hotel.",row("calendario"))+step("Crea el ticket con el motivo de la sesión, la fecha y la hora programadas.",row("formSAC")),
+      prep:["Plan del hotel confirmado","Motivo de la sesión","Fecha y hora programadas"],after:""}}
+  }}
+};
+function chips(el,opts,cur,pick){
+  el.innerHTML=opts.map(([k,l])=>`<button class="chip" type="button" data-k="${k}" aria-pressed="${k===cur}">${esc(l)}</button>`).join("");
+  el.onclick=e=>{const b=e.target.closest(".chip"); if(b) pick(b.dataset.k);};
+}
+document.querySelectorAll("[data-router]").forEach(box=>{
+  const f=FLOWS[box.dataset.router]; let cur=null;
+  box.innerHTML=`<div class="q"><div class="chips"></div></div><div class="result" hidden></div>`;
+  const ch=box.querySelector(".chips"), res=box.querySelector(".result");
+  function render(){
+    chips(ch,Object.entries(f.opts).map(([k,o])=>[k,o.label]),cur,k=>{cur=k;render();});
+    if(!cur){res.hidden=true;return;}
+    const r=f.opts[cur].r,[c,l]=TAGS[r.type];
+    res.hidden=false;
+    res.innerHTML=`<div class="result-head"><span class="tag ${c}">${l}</span><h3>${r.title}</h3></div>
+      <ol class="steps">${r.steps}</ol>
+      ${r.prep.length?`<div class="prep"><b>Ten listo</b><ul class="list">${r.prep.map(i=>`<li>${i}</li>`).join("")}</ul></div>`:""}
+      ${r.after?`<p class="small muted">${r.after}</p>`:""}`;
+  }
+  render();
+});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-scroll]"); if(!b)return; const t=document.getElementById(b.dataset.scroll).closest(".tpl"); t.scrollIntoView({behavior:"smooth",block:"center"}); t.classList.remove("flash"); void t.offsetWidth; t.classList.add("flash");});
+
+/* ---------- checklist por área ---------- */
+const CHECK = {
+  AM:[["Tipo de solicitud definido","Creación de OTAs o inconsistencia"],["Partner Card validado","Con Partner Card: solo ticket. Sin Partner Card: agenda sesión + ticket"],["Sesión agendada con el hotel","Si es creación o el hotel no tiene Partner Card"],["OTAs requeridas y detalles de la solicitud",""],["Campos del formulario HubSpot revisados","Cada formulario detalla lo que debe llevar el ticket"]],
+  Implementacion:[["Confirmado que es un tema de OTAs y no del PMS","Si es del PMS, va a Mantenimiento por Teams"],["Sesión agendada con el hotel",""],["Fecha y hora de la sesión en el formulario",""],["OTAs requeridas y detalles","Si es creación de OTAs"],["Detalle de la inconsistencia","Si es una inconsistencia"],["Campos del formulario HubSpot revisados",""]],
+  SAC:[["Plan del hotel confirmado como Estándar o Básico","Plus/Premium van al AM"],["Sesión agendada con el hotel",""],["Motivo de la sesión",""],["Fecha y hora programadas",""],["Campos del formulario HubSpot revisados",""]]
+};
+document.querySelectorAll("[data-check]").forEach(box=>{
+  const area=box.dataset.check, list=CHECK[area], done={};
+  box.innerHTML=`<div class="check"><div class="check-top"><span class="small muted">Marca cada punto antes de crear el ticket.</span><div class="progress"><div class="bar"><i></i></div><span class="cnt"></span></div></div><div class="items"></div><div class="check-msg"></div><button class="btn btn-ghost" type="button" style="align-self:flex-start">Reiniciar checklist</button></div>`;
+  const items=box.querySelector(".items"), bar=box.querySelector(".bar i"), cnt=box.querySelector(".cnt"), msg=box.querySelector(".check-msg");
+  function render(){
+    items.innerHTML=list.map(([t,h],i)=>{const id=`ck-${area}-${i}`,on=!!done[i];
+      return `<label class="item${on?" done":""}" for="${id}"><input type="checkbox" id="${id}" data-i="${i}" ${on?"checked":""}><span><b style="font-weight:500">${esc(t)}</b>${h?`<small>${esc(h)}</small>`:""}</span></label>`;}).join("");
+    const n=Object.values(done).filter(Boolean).length;
+    cnt.textContent=`${n} / ${list.length}`; bar.style.width=(n/list.length*100)+"%";
+    if(n===list.length){msg.style.background="var(--green-bg)";msg.textContent="Listo. Puedes enviar el ticket.";}
+    else{msg.style.background="var(--gray-bg)";msg.textContent=`Te faltan ${list.length-n} punto${list.length-n===1?"":"s"} antes de enviar.`;}
+  }
+  items.addEventListener("change",e=>{const i=e.target.dataset.i; if(i==null)return; done[i]=e.target.checked; render();});
+  box.querySelector("button").addEventListener("click",()=>{for(const k in done)delete done[k]; render();});
+  render();
+});
+
+/* ---------- copiar plantilla ---------- */
+$("#copyTpl").addEventListener("click",async e=>{
+  const b=e.currentTarget,t=$("#tplText").innerText;
+  try{await navigator.clipboard.writeText(t); b.textContent="Copiado";}
+  catch{const r=document.createRange(); r.selectNodeContents($("#tplText")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent="Texto seleccionado";}
+  setTimeout(()=>b.textContent="Copiar",1800);
+});
+
+/* ---------- buscador ---------- */
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+const index=[];
+document.querySelectorAll("[data-page]").forEach(pg=>{
+  const pid=pg.dataset.page, plabel=PAGES.find(p=>p.id===pid).label;
+  pg.querySelectorAll("section, details.acc").forEach(el=>{
+    const h=el.querySelector("summary, h2, h3"); const title=(h?h.textContent:plabel).trim();
+    index.push({el,pid,plabel,title,text:norm(title+" "+(el.dataset.idx||"")+" "+el.textContent)});
+  });
+});
+const qEl=$("#q"), rEl=$("#results");
+qEl.addEventListener("input",()=>{
+  const q=norm(qEl.value.trim()); if(q.length<2){rEl.hidden=true;return;}
+  const terms=q.split(/\s+/), hits=index.filter(x=>terms.every(t=>x.text.includes(t))).slice(0,8);
+  rEl.innerHTML=hits.length?hits.map(h=>`<button type="button" data-i="${index.indexOf(h)}">${esc(h.title)}<small>${esc(h.plabel)}</small></button>`).join(""):`<div class="none">Sin resultados para “${esc(qEl.value)}”.</div>`;
+  rEl.hidden=false;
+});
+rEl.addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b)return; const h=index[+b.dataset.i];
+  location.hash=h.pid; show(h.pid);
+  if(h.el.tagName==="DETAILS") h.el.open=true;
+  h.el.scrollIntoView({behavior:"smooth",block:"center"});
+  h.el.classList.remove("flash"); void h.el.offsetWidth; h.el.classList.add("flash");
+  rEl.hidden=true; qEl.value="";
+});
+document.addEventListener("click",e=>{ if(!e.target.closest(".search")) rEl.hidden=true; });
+qEl.addEventListener("keydown",e=>{ if(e.key==="Escape"){rEl.hidden=true;qEl.blur();} });
+
+route();
+</script>
+</body>
+</html>
